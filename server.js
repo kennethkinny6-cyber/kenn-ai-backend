@@ -1,3 +1,4 @@
+
 import express from "express";
 import cors from "cors";
 
@@ -6,17 +7,19 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Kenn AI Backend Running");
+  res.send("Kenn AI backend running");
 });
 
-app.post("/ask", async (req, res) => {
-  const { question } = req.body;
+app.post("/chat", (req, res) => {
+  const userMessage = req.body.message;
 
-  const answer = "Kenn AI: " + question;
+  // Simple AI reply (we will upgrade later)
+  const reply = "You said: " + userMessage;
 
-  res.json({ answer });
+  res.json({ reply });
 });
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
 });
