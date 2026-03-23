@@ -1,20 +1,7 @@
-import express from "express";
-import cors from "cors";
-import fetch from "node-fetch";
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.send("Kenn AI backend running");
-});
-
 app.post("/chat", async (req, res) => {
   const userMessage = req.body.message;
 
   try {
-    console.log("API KEY:", process.env.OPENAI_API_KEY);
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -24,23 +11,29 @@ app.post("/chat", async (req, res) => {
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: "You are Kenn AI, an educational AI assistant." },
           { role: "user", content: userMessage }
         ]
       })
     });
 
     const data = await response.json();
-    const reply = data.choices[0].message.content;
 
-    res.json({ reply });
+    console.log("FULL API RESPONSE:", data);
+
+    // ✅ Handle errors properly
+    if (!data.choices || !data.choices[0]) {
+      return res.json({
+        reply: "API error: " + (data.error?.message || "Unknown error")
+      });
+    }
+
+    res.json({
+      reply: data.choices[0].message.content
+    });
 
   } catch (error) {
-    res.json({ reply: "Error getting AI response" });
+    res.json({
+      reply: "Server error: " + error.message
+    });
   }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
 });
