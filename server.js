@@ -1,3 +1,15 @@
+import express from "express";
+import cors from "cors";
+import fetch from "node-fetch";
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.send("Kenn AI backend running");
+});
+
 app.post("/chat", async (req, res) => {
   const userMessage = req.body.message;
 
@@ -18,22 +30,18 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    console.log("FULL API RESPONSE:", data);
-
-    // ✅ Handle errors properly
-    if (!data.choices || !data.choices[0]) {
-      return res.json({
-        reply: "API error: " + (data.error?.message || "Unknown error")
-      });
+    if (!data.choices) {
+      return res.json({ reply: "API error" });
     }
 
-    res.json({
-      reply: data.choices[0].message.content
-    });
+    res.json({ reply: data.choices[0].message.content });
 
   } catch (error) {
-    res.json({
-      reply: "Server error: " + error.message
-    });
+    res.json({ reply: "Server error" });
   }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
 });
