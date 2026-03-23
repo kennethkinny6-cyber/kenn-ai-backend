@@ -6,10 +6,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Test route
 app.get("/", (req, res) => {
   res.send("Kenn AI backend running");
 });
 
+// Chat route
 app.post("/chat", async (req, res) => {
   const userMessage = req.body.message;
 
@@ -23,24 +25,44 @@ app.post("/chat", async (req, res) => {
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          { role: "user", content: userMessage }
+          {
+            role: "system",
+            content: "You are Kenn AI, a helpful and smart AI assistant for students."
+          },
+          {
+            role: "user",
+            content: userMessage
+          }
         ]
       })
     });
 
     const data = await response.json();
 
-    if (!data.choices) {
-      return res.json({ reply: "API error" });
+    // 🔍 Log full response (for debugging)
+    console.log("API RESPONSE:", data);
+
+    // ❌ Handle API errors
+    if (!data.choices || !data.choices[0]) {
+      return res.json({
+        reply: "API error: " + (data.error?.message || "Unknown error")
+      });
     }
 
-    res.json({ reply: data.choices[0].message.content });
+    // ✅ Send AI reply
+    res.json({
+      reply: data.choices[0].message.content
+    });
 
   } catch (error) {
-    res.json({ reply: "Server error" });
+    console.log("SERVER ERROR:", error);
+    res.json({
+      reply: "Server error: " + error.message
+    });
   }
 });
 
+// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
