@@ -16,18 +16,18 @@ app.post("/chat", async (req, res) => {
   const userMessage = req.body.message;
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "llama3-8b-8192",
         messages: [
           {
             role: "system",
-            content: "You are Kenn AI, a helpful and smart AI assistant for students."
+            content: "You are Kenn AI, a helpful and smart AI assistant."
           },
           {
             role: "user",
@@ -39,17 +39,17 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    // 🔍 Log full response (for debugging)
-    console.log("API RESPONSE:", data);
+    // Log response for debugging
+    console.log("GROQ RESPONSE:", data);
 
-    // ❌ Handle API errors
+    // Handle errors
     if (!data.choices || !data.choices[0]) {
       return res.json({
-        reply: "API error: " + (data.error?.message || "Unknown error")
+        reply: "AI error: " + (data.error?.message || "Unknown error")
       });
     }
 
-    // ✅ Send AI reply
+    // Send AI reply
     res.json({
       reply: data.choices[0].message.content
     });
